@@ -30,21 +30,12 @@ func (c *Coordinator) Done() bool {
 	return len(c.mapTasks) == 0 && len(c.reduceTasks) == 0
 }
 
-// var (
-// 	port = flag.Int("port")
-// )
-
-// Cook up a unique-ish UNIX-domain socket name
-// in /var/tmp, for the coordinator.
-// Can't use the current directory since
-// Athena AFS doesn't support UNIX-domain sockets.
-func coordinatorSock() string {
+// Cook up a unique-ish UNIX-domain socket name in /var/tmp, for the coordinator.
+func CoordinatorSock() string {
 	s := "/var/tmp/824-mr-"
 	s += strconv.Itoa(os.Getuid())
 	return s
 }
-
-// func (c *Coordinator) RequestTask()
 
 func MakeCoordinator(files []string, nReduce int) *Coordinator {
 	c := Coordinator{nReduce: nReduce}
@@ -61,12 +52,12 @@ func MakeCoordinator(files []string, nReduce int) *Coordinator {
 		c.reduceTasks[i] = 0
 	}
 
-	c.server()
+	go c.server()
 	return &c
 }
 
 func (c *Coordinator) server() {
-	sockname := coordinatorSock()
+	sockname := CoordinatorSock()
 	os.Remove(sockname)
 	lis, err := net.Listen("unix", sockname)
 	if err != nil {
@@ -142,14 +133,14 @@ func (c *Coordinator) ReportTask(ctx context.Context, args *ReportArgs) (*Report
 	defer c.mu.Unlock()
 
 	if args.Kind == TaskType_Map {
-		log.Printf("Coordinator: removing map task %v", args.Task)
 		delete(c.mapTasks, args.Task)
+		log.Printf("Coordinator: removing map task %v, %v remain", args.Task, len(c.mapTasks))
 		for i, f := range args.Intermediates {
 			c.intermediates[i] = append(c.intermediates[i], f)
 		}
 	} else {
-		log.Printf("Coordinator: removing reduce task %v", args.Id)
 		delete(c.reduceTasks, int(args.Id))
+		log.Printf("Coordinator: removing reduce task %v, %v remain", args.Id, len(c.reduceTasks))
 	}
 	return &ReportReply{}, nil
 }

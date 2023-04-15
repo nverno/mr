@@ -27,9 +27,9 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WcClient interface {
-	// Worker request task from coordinator
+	// Workers request map/reduce tasks from coordinator
 	RequestTask(ctx context.Context, in *RequestArgs, opts ...grpc.CallOption) (*RequestReply, error)
-	// Report reduce results
+	// Workers report map/reduce results
 	ReportTask(ctx context.Context, in *ReportArgs, opts ...grpc.CallOption) (*ReportReply, error)
 }
 
@@ -63,9 +63,9 @@ func (c *wcClient) ReportTask(ctx context.Context, in *ReportArgs, opts ...grpc.
 // All implementations must embed UnimplementedWcServer
 // for forward compatibility
 type WcServer interface {
-	// Worker request task from coordinator
+	// Workers request map/reduce tasks from coordinator
 	RequestTask(context.Context, *RequestArgs) (*RequestReply, error)
-	// Report reduce results
+	// Workers report map/reduce results
 	ReportTask(context.Context, *ReportArgs) (*ReportReply, error)
 	mustEmbedUnimplementedWcServer()
 }

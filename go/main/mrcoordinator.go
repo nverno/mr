@@ -12,7 +12,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/nverno/mrwc/go/mr"
+	"github.com/nverno/mr/go/mr"
 )
 
 func main() {

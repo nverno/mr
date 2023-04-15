@@ -7,5 +7,5 @@ all:
 
 gopb: $(PROTO)
 	protoc -I$(CURDIR) --go_out=$(CURDIR) \
-	--go-grpc_out=$(CURDIR) \
+	--go-grpc_out=$(CURDIR)               \
 	$(PROTO)

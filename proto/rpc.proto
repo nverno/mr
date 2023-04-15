@@ -3,11 +3,11 @@ package mr;
 
 option go_package = "go/mr";
 
-  enum TaskType {
-    None = 0;
-    Map = 1;
-    Reduce = 2;
-  }
+enum TaskType {
+  None = 0;
+  Map = 1;
+  Reduce = 2;
+}
 
 message RequestArgs {}
 
@@ -30,9 +30,9 @@ message ReportArgs {
 message ReportReply {}
 
 service Wc {
-  // Worker request task from coordinator
+  // Workers request map/reduce tasks from coordinator
   rpc RequestTask(RequestArgs) returns (RequestReply);
 
-  // Report reduce results
+  // Workers report map/reduce results
   rpc ReportTask(ReportArgs) returns (ReportReply);
 }

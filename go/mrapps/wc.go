@@ -11,7 +11,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/nverno/mrwc/go/mr"
+	"github.com/nverno/mr/go/mr"
 )
 
 // The map function is called once for each file of input. The first

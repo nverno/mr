@@ -1,38 +1,141 @@
-// TODO: create coordinator struct
-//
+pub mod mapreduce {
+    tonic::include_proto!("mapreduce");
+}
+use std::sync::Mutex;
+use std::{collections::HashMap, time::SystemTime};
 
+use mapreduce::map_reduce_server::MapReduce;
+use tonic::{Request, Response, Status};
+
+use self::mapreduce::{ReportArgs, ReportReply, RequestArgs, RequestReply, TaskType};
+
+#[derive(Debug)]
 pub struct Coordinator {
-    
+    map_tasks: HashMap<String, SystemTime>,
+    reduce_tasks: HashMap<usize, SystemTime>,
+    n_worker: usize,
+    n_reduce: usize,
+    timeout: u64,
+    intermediates: HashMap<usize, Vec<String>>,
 }
 
 impl Coordinator {
-    fn done() -> bool {
-        // true if no map tasks or reduce tasks remain
-        todo!();
+    pub fn new(timeout: u64) -> Self {
+        Self {
+            map_tasks: HashMap::new(),
+            reduce_tasks: HashMap::new(),
+            intermediates: HashMap::new(),
+            n_worker: 0,
+            n_reduce: 0,
+            timeout,
+        }
+    }
+    // true when no map tasks or reduce tasks remain
+    pub fn done(&self) -> bool {
+        self.map_tasks.is_empty() && self.reduce_tasks.is_empty()
     }
 
-    // create new gRPC server
-    fn server() {}
-
-    // Find pending map task
-    // when found, set its start time
-    fn next_map_task() -> (String, bool) {
-        todo!();
+    // Find pending map task. If found, set its start time
+    pub fn next_map_task(&mut self) -> Option<String> {
+        let now = SystemTime::now();
+        for (task, start) in &mut self.map_tasks {
+            if now.duration_since(*start).unwrap().as_secs() > self.timeout {
+                *start = now;
+                return Some(String::from(task));
+            }
+        }
+        None
     }
 
     // Find pending reduce task and set its start time
-    fn next_reduce_task() -> (i32, bool) {
-        todo!();
-    }
-
-    // Called by workers to request a new task
-    fn request_task(/*ctx, args*/) -> (/*reply, error*/) {
-        todo!();
-    }
-
-    // Called by workers to report task results
-    fn report_task(/*ctx, args*/) -> (/*reply, error*/) {
-        todo!();
+    pub fn next_reduce_task(&mut self) -> Option<usize> {
+        let now = SystemTime::now();
+        for (task, start) in &mut self.reduce_tasks {
+            if now.duration_since(*start).unwrap().as_secs() > self.timeout {
+                *start = now;
+                return Some(*task);
+            }
+        }
+        None
     }
 }
 
+#[derive(Debug)]
+pub struct CoordinatorService {
+    coordinator: Mutex<Coordinator>,
+}
+
+#[tonic::async_trait]
+impl MapReduce for CoordinatorService {
+    // Called by workers to request a new task
+    async fn request_task(
+        &self,
+        _args: Request<RequestArgs>,
+    ) -> Result<Response<RequestReply>, Status> {
+        let mut c = self.coordinator.lock().unwrap();
+        let mut reply = RequestReply {
+            n_reduce: c.n_reduce as i32,
+            ..Default::default()
+        };
+
+        if let Some(task) = c.next_map_task() {
+            c.n_worker += 1;
+            reply.kind = TaskType::Map as i32;
+            reply.filename = task;
+            reply.task_no = c.n_worker as i32;
+            return Ok(Response::new(reply));
+        }
+
+        if c.map_tasks.is_empty() {
+            if let Some(task) = c.next_reduce_task() {
+                reply.kind = TaskType::Reduce as i32;
+                reply.task_no = task as i32;
+                reply.intermediates = c.intermediates[&task].clone();
+            }
+        }
+
+        reply.done = c.done();
+        Ok(Response::new(reply))
+    }
+
+    // Called by workers to report task results
+    async fn report_task(
+        &self,
+        args: Request<ReportArgs>,
+    ) -> Result<Response<ReportReply>, Status> {
+        let mut c = self.coordinator.lock().unwrap();
+
+        let args = args.get_ref();
+        if args.kind == TaskType::Map as i32 {
+            c.map_tasks.remove(&args.task);
+            println!(
+                "Coordinator: finished map task {}: {} to go",
+                args.task,
+                c.map_tasks.len()
+            );
+            for (i, f) in args.intermediates.iter().enumerate() {
+                c.intermediates
+                    .entry(i)
+                    .or_insert(Vec::new())
+                    .push(String::from(f));
+            }
+        } else {
+            c.reduce_tasks.remove(&(args.id as usize));
+            println!(
+                "Coordinator: finished reduce task {}: {} to go",
+                args.task,
+                c.reduce_tasks.len()
+            );
+        }
+
+        Ok(Response::new(ReportReply::default()))
+    }
+}
+
+impl CoordinatorService {
+    pub fn new(timeout: u64) -> Self {
+        Self {
+            coordinator: Mutex::new(Coordinator::new(timeout)),
+        }
+    }
+}

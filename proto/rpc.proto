@@ -1,5 +1,5 @@
 syntax = "proto3";
-package mr;
+package mapreduce;
 
 option go_package = "go/mr";
 
@@ -29,7 +29,7 @@ message ReportArgs {
 
 message ReportReply {}
 
-service Wc {
+service MapReduce {
   // Workers request map/reduce tasks from coordinator
   rpc RequestTask(RequestArgs) returns (RequestReply);
 

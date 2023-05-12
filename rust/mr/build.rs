@@ -1,5 +1,6 @@
-extern crate prost_build;
+extern crate tonic_build;
 
 fn main() {
-    prost_build::compile_protos(&["src/proto/rpc.proto"], &["src"]).unwrap();
+    tonic_build::compile_protos("proto/rpc.proto")
+        .unwrap_or_else(|e| panic!("Failed to compile protos {:?}", e));
 }

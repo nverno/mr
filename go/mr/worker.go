@@ -37,7 +37,7 @@ func ihash(key string) int {
 }
 
 // Request new task from Coordinator
-func callRequestTask(w WcClient) *RequestReply {
+func callRequestTask(w MapReduceClient) *RequestReply {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	reply, err := w.RequestTask(ctx, &RequestArgs{})
@@ -48,7 +48,7 @@ func callRequestTask(w WcClient) *RequestReply {
 }
 
 // Report Map/Reduce results to Coordinator
-func callReportTask(w WcClient, args *ReportArgs) {
+func callReportTask(w MapReduceClient, args *ReportArgs) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	_, err := w.ReportTask(ctx, args)
@@ -58,7 +58,7 @@ func callReportTask(w WcClient, args *ReportArgs) {
 }
 
 // Handle Map tasks, report intermediate files to Coordinator
-func handleMap(w WcClient, filename string, taskno int, nreduce int, mapf func(string, string) []KeyValue) {
+func handleMap(w MapReduceClient, filename string, taskno int, nreduce int, mapf func(string, string) []KeyValue) {
 	f, err := os.Open(filename)
 	if err != nil {
 		log.Fatalf("cannot open %v\n", filename)
@@ -120,7 +120,7 @@ func readIntermediates(files []string) []KeyValue {
 }
 
 // Handle Reduce tasks and report to Coordinator
-func handleReduce(w WcClient, taskno int, files []string, reducef func(string, []string) string) {
+func handleReduce(w MapReduceClient, taskno int, files []string, reducef func(string, []string) string) {
 	kvs := readIntermediates(files)
 	sort.Sort(ByKey(kvs))
 
@@ -164,7 +164,7 @@ func Worker(mapf func(string, string) []KeyValue, reducef func(string, []string)
 	}
 	defer conn.Close()
 
-	worker := NewWcClient(conn)
+	worker := NewMapReduceClient(conn)
 	for {
 		reply := callRequestTask(worker)
 		if reply.Done {

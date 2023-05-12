@@ -19,130 +19,130 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Wc_RequestTask_FullMethodName = "/mr.Wc/RequestTask"
-	Wc_ReportTask_FullMethodName  = "/mr.Wc/ReportTask"
+	MapReduce_RequestTask_FullMethodName = "/mapreduce.MapReduce/RequestTask"
+	MapReduce_ReportTask_FullMethodName  = "/mapreduce.MapReduce/ReportTask"
 )
 
-// WcClient is the client API for Wc service.
+// MapReduceClient is the client API for MapReduce service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type WcClient interface {
+type MapReduceClient interface {
 	// Workers request map/reduce tasks from coordinator
 	RequestTask(ctx context.Context, in *RequestArgs, opts ...grpc.CallOption) (*RequestReply, error)
 	// Workers report map/reduce results
 	ReportTask(ctx context.Context, in *ReportArgs, opts ...grpc.CallOption) (*ReportReply, error)
 }
 
-type wcClient struct {
+type mapReduceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewWcClient(cc grpc.ClientConnInterface) WcClient {
-	return &wcClient{cc}
+func NewMapReduceClient(cc grpc.ClientConnInterface) MapReduceClient {
+	return &mapReduceClient{cc}
 }
 
-func (c *wcClient) RequestTask(ctx context.Context, in *RequestArgs, opts ...grpc.CallOption) (*RequestReply, error) {
+func (c *mapReduceClient) RequestTask(ctx context.Context, in *RequestArgs, opts ...grpc.CallOption) (*RequestReply, error) {
 	out := new(RequestReply)
-	err := c.cc.Invoke(ctx, Wc_RequestTask_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, MapReduce_RequestTask_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *wcClient) ReportTask(ctx context.Context, in *ReportArgs, opts ...grpc.CallOption) (*ReportReply, error) {
+func (c *mapReduceClient) ReportTask(ctx context.Context, in *ReportArgs, opts ...grpc.CallOption) (*ReportReply, error) {
 	out := new(ReportReply)
-	err := c.cc.Invoke(ctx, Wc_ReportTask_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, MapReduce_ReportTask_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// WcServer is the server API for Wc service.
-// All implementations must embed UnimplementedWcServer
+// MapReduceServer is the server API for MapReduce service.
+// All implementations must embed UnimplementedMapReduceServer
 // for forward compatibility
-type WcServer interface {
+type MapReduceServer interface {
 	// Workers request map/reduce tasks from coordinator
 	RequestTask(context.Context, *RequestArgs) (*RequestReply, error)
 	// Workers report map/reduce results
 	ReportTask(context.Context, *ReportArgs) (*ReportReply, error)
-	mustEmbedUnimplementedWcServer()
+	mustEmbedUnimplementedMapReduceServer()
 }
 
-// UnimplementedWcServer must be embedded to have forward compatible implementations.
-type UnimplementedWcServer struct {
+// UnimplementedMapReduceServer must be embedded to have forward compatible implementations.
+type UnimplementedMapReduceServer struct {
 }
 
-func (UnimplementedWcServer) RequestTask(context.Context, *RequestArgs) (*RequestReply, error) {
+func (UnimplementedMapReduceServer) RequestTask(context.Context, *RequestArgs) (*RequestReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RequestTask not implemented")
 }
-func (UnimplementedWcServer) ReportTask(context.Context, *ReportArgs) (*ReportReply, error) {
+func (UnimplementedMapReduceServer) ReportTask(context.Context, *ReportArgs) (*ReportReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReportTask not implemented")
 }
-func (UnimplementedWcServer) mustEmbedUnimplementedWcServer() {}
+func (UnimplementedMapReduceServer) mustEmbedUnimplementedMapReduceServer() {}
 
-// UnsafeWcServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to WcServer will
+// UnsafeMapReduceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to MapReduceServer will
 // result in compilation errors.
-type UnsafeWcServer interface {
-	mustEmbedUnimplementedWcServer()
+type UnsafeMapReduceServer interface {
+	mustEmbedUnimplementedMapReduceServer()
 }
 
-func RegisterWcServer(s grpc.ServiceRegistrar, srv WcServer) {
-	s.RegisterService(&Wc_ServiceDesc, srv)
+func RegisterMapReduceServer(s grpc.ServiceRegistrar, srv MapReduceServer) {
+	s.RegisterService(&MapReduce_ServiceDesc, srv)
 }
 
-func _Wc_RequestTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _MapReduce_RequestTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RequestArgs)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WcServer).RequestTask(ctx, in)
+		return srv.(MapReduceServer).RequestTask(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Wc_RequestTask_FullMethodName,
+		FullMethod: MapReduce_RequestTask_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WcServer).RequestTask(ctx, req.(*RequestArgs))
+		return srv.(MapReduceServer).RequestTask(ctx, req.(*RequestArgs))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Wc_ReportTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _MapReduce_ReportTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReportArgs)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WcServer).ReportTask(ctx, in)
+		return srv.(MapReduceServer).ReportTask(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Wc_ReportTask_FullMethodName,
+		FullMethod: MapReduce_ReportTask_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WcServer).ReportTask(ctx, req.(*ReportArgs))
+		return srv.(MapReduceServer).ReportTask(ctx, req.(*ReportArgs))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Wc_ServiceDesc is the grpc.ServiceDesc for Wc service.
+// MapReduce_ServiceDesc is the grpc.ServiceDesc for MapReduce service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Wc_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "mr.Wc",
-	HandlerType: (*WcServer)(nil),
+var MapReduce_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "mapreduce.MapReduce",
+	HandlerType: (*MapReduceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "RequestTask",
-			Handler:    _Wc_RequestTask_Handler,
+			Handler:    _MapReduce_RequestTask_Handler,
 		},
 		{
 			MethodName: "ReportTask",
-			Handler:    _Wc_ReportTask_Handler,
+			Handler:    _MapReduce_ReportTask_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

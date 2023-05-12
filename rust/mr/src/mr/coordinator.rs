@@ -1,13 +1,9 @@
-pub mod mapreduce {
-    tonic::include_proto!("mapreduce");
-}
 use std::sync::Mutex;
 use std::{collections::HashMap, time::SystemTime};
-
-use mapreduce::map_reduce_server::MapReduce;
 use tonic::{Request, Response, Status};
 
-use self::mapreduce::{ReportArgs, ReportReply, RequestArgs, RequestReply, TaskType};
+use crate::mapreduce::map_reduce_server::MapReduce;
+use crate::mapreduce::{ReportArgs, ReportReply, RequestArgs, RequestReply, TaskType};
 
 #[derive(Debug)]
 pub struct Coordinator {
@@ -20,16 +16,24 @@ pub struct Coordinator {
 }
 
 impl Coordinator {
-    pub fn new(timeout: u64) -> Self {
-        Self {
+    pub fn new(timeout: u64, n_reduce: usize, files: Vec<String>) -> Self {
+        let mut c  = Self {
             map_tasks: HashMap::new(),
             reduce_tasks: HashMap::new(),
             intermediates: HashMap::new(),
             n_worker: 0,
-            n_reduce: 0,
+            n_reduce,
             timeout,
+        };
+        for f in files {
+            c.map_tasks.insert(f, SystemTime::UNIX_EPOCH);
         }
+        for i in 0..n_reduce {
+            c.reduce_tasks.insert(i, SystemTime::UNIX_EPOCH);
+        }
+        c
     }
+
     // true when no map tasks or reduce tasks remain
     pub fn done(&self) -> bool {
         self.map_tasks.is_empty() && self.reduce_tasks.is_empty()
@@ -133,9 +137,9 @@ impl MapReduce for CoordinatorService {
 }
 
 impl CoordinatorService {
-    pub fn new(timeout: u64) -> Self {
+    pub fn new(timeout: u64, n_reduce: usize, files: Vec<String>) -> Self {
         Self {
-            coordinator: Mutex::new(Coordinator::new(timeout)),
+            coordinator: Mutex::new(Coordinator::new(timeout, n_reduce, files)),
         }
     }
 }

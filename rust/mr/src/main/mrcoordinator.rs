@@ -1,5 +1,6 @@
-use mr::mr::coordinator::{mapreduce::map_reduce_server::MapReduceServer, CoordinatorService};
+// use crate::mapreduce::{mapreduce::map_reduce_server::MapReduceServer, CoordinatorService};
 use std::env;
+use mr::{mr::coordinator::CoordinatorService, mapreduce::map_reduce_server::MapReduceServer};
 use tonic::transport::Server;
 
 #[tokio::main]
@@ -9,9 +10,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         std::process::exit(1);
     }
 
-    let addr = "[::1]:10000".parse().unwrap();
+    let addr = "http://[::1]:10000".parse().unwrap();
 
-    let c = CoordinatorService::new(10);
+    let files = env::args().skip(1).collect();
+    let c = CoordinatorService::new(10, 10, files);
 
     let svc = MapReduceServer::new(c);
 

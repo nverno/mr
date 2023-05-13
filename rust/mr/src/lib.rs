@@ -4,6 +4,7 @@ pub mod mapreduce {
     tonic::include_proto!("mapreduce");
 }
 pub mod mr;
+pub mod mrapps;
 
 impl TryFrom<i32> for TaskType {
     type Error = ();

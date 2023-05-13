@@ -14,7 +14,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let reducef: Symbol<ReduceFunc> =
             lib.get(b"reduce").expect("failed to load reduce function");
 
-        let mut w = MapReduceClient::connect("http://[::1]:10000").await?;
+        let mut w = MapReduceClient::connect(
+            env::var("COORD_ADDR").unwrap_or_else(|_| "127.0.0.1:8080".to_owned()),
+        )
+        .await?;
 
         work(&mut w, *mapf, *reducef).await?
     }

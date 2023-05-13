@@ -10,10 +10,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         std::process::exit(1);
     }
 
-    let addr = env::var("COORD_ADDR")
-        .unwrap_or_else(|_| "127.0.0.1:8080".to_owned())
-        .parse()
-        .unwrap();
+    let port = env::var("PORT").unwrap_or_else(|_| "8080".to_owned());
+    let addr = format!("127.0.0.1:{}", port).parse().unwrap();
 
     let files = env::args().skip(1).collect();
     let c = CoordinatorService::new(10, 10, files);

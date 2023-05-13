@@ -6,10 +6,8 @@ use std::hash::{Hash, Hasher};
 use std::io::{BufReader, Read, Write};
 
 use crate::mapreduce::ReportArgs;
-use crate::{
-    mapreduce::{map_reduce_client::MapReduceClient, RequestArgs, TaskType},
-    KeyValue, MapFunc, ReduceFunc,
-};
+use crate::mapreduce::{map_reduce_client::MapReduceClient, RequestArgs, TaskType};
+use mr_types::{KeyValue, MapFunc, ReduceFunc};
 use tonic::{transport::Channel, Request};
 
 // Handle map task. Return data to report to coordinator
@@ -28,6 +26,8 @@ fn handle_map(
 
         kvs.sort_unstable();
 
+        // println!("key-values: {:?}", kvs);
+        
         let mut hasher = DefaultHasher::new();
         let mut buckets: Vec<Vec<KeyValue>> = vec![vec![]; n_reduce];
         for kv in kvs {
@@ -39,11 +39,11 @@ fn handle_map(
         let mut intermediates = vec![];
         for i in 0..n_reduce {
             let fname = format!("mr-{}-{}", task_no, i);
-            intermediates[i] = fname.clone();
+            intermediates.push(fname.clone());
 
             let mut fp = File::create(&fname)?;
 
-            let data = serde_json::to_string(&intermediates[i])?;
+            let data = serde_json::to_string(&buckets[i])?;
             fp.write_all(data.as_bytes())?;
         }
 
@@ -91,7 +91,6 @@ fn handle_reduce(
             vals.push(kvs[i].value.clone());
             i += 1;
         }
-        i -= 1;
         unsafe {
             tmp.write_all(format!("{} {}\n", key, reducef(key.clone(), vals)).as_bytes())?;
         }

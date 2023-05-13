@@ -1,0 +1,2 @@
+[workspace]
+members = ["mr", "mr-apps/wc", "mr-types"]

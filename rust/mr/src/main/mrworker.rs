@@ -1,10 +1,13 @@
 use libloading::{Library, Symbol};
-use mr::{mapreduce::map_reduce_client::MapReduceClient, mr::worker::work, MapFunc, ReduceFunc};
+use mr::{mapreduce::map_reduce_client::MapReduceClient, mr::worker::work};
+use mr_types::{MapFunc, ReduceFunc};
 use std::env;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let lib = env::args().nth(1).expect("Usage: mr-worker xxx.so");
+
+    let port = env::var("PORT").unwrap_or_else(|_| "8080".to_owned());
 
     unsafe {
         // Load map/reduce functions from dynamic library
@@ -14,10 +17,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let reducef: Symbol<ReduceFunc> =
             lib.get(b"reduce").expect("failed to load reduce function");
 
-        let mut w = MapReduceClient::connect(
-            env::var("COORD_ADDR").unwrap_or_else(|_| "127.0.0.1:8080".to_owned()),
-        )
-        .await?;
+        let mut w = MapReduceClient::connect(format!("http://127.0.0.1:{port}")).await?;
 
         work(&mut w, *mapf, *reducef).await?
     }

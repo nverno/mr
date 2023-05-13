@@ -27,7 +27,7 @@ fn handle_map(
         kvs.sort_unstable();
 
         // println!("key-values: {:?}", kvs);
-        
+
         let mut hasher = DefaultHasher::new();
         let mut buckets: Vec<Vec<KeyValue>> = vec![vec![]; n_reduce];
         for kv in kvs {
@@ -62,8 +62,6 @@ fn read_intermediates(files: &Vec<String>) -> Result<Vec<KeyValue>, Box<dyn Erro
     for fname in files {
         let file = File::open(fname)?;
         let reader = BufReader::new(file);
-        // let mut buf = String::new();
-        // f.read_to_string(&mut buf)?;
         let mut data: Vec<KeyValue> = serde_json::from_reader(reader)?;
         res.append(&mut data);
     }

@@ -1,4 +1,4 @@
-use std::sync::Mutex;
+use std::sync::{Mutex, Arc};
 use std::{collections::HashMap, time::SystemTime};
 use tonic::{Request, Response, Status};
 
@@ -66,7 +66,7 @@ impl Coordinator {
 
 #[derive(Debug)]
 pub struct CoordinatorService {
-    coordinator: Mutex<Coordinator>,
+    pub coordinator: Arc<Mutex<Coordinator>>,
 }
 
 #[tonic::async_trait]
@@ -139,7 +139,7 @@ impl MapReduce for CoordinatorService {
 impl CoordinatorService {
     pub fn new(timeout: u64, n_reduce: usize, files: Vec<String>) -> Self {
         Self {
-            coordinator: Mutex::new(Coordinator::new(timeout, n_reduce, files)),
+            coordinator: Arc::new(Mutex::new(Coordinator::new(timeout, n_reduce, files))),
         }
     }
 }

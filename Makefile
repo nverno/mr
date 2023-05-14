@@ -4,11 +4,15 @@ AWK   ?= gawk
 PROTO  =  $(CURDIR)/proto/rpc.proto
 PROTOC ?= protoc
 
+DATADIR = $(CURDIR)/data
+
 GODIR     =  $(CURDIR)/go
 GOSRC     =  $(shell find $(GODIR) -type f -name \*.go)
 GOAPPSDIR =  $(GODIR)/mrapps
 GOAPPS    =  $(shell find $(GOAPPSDIR) -type f -name \*.go)
 GOFLAGS   ?= -race
+
+RUSTDIR = $(CURDIR)/rust
 
 # export GO111MODULE=on
 
@@ -33,10 +37,15 @@ $(GOAPPSDIR)/%.so: $(GOAPPSDIR)/%.go
 wc.so: $(GOAPPSDIR)/wc.so  ## Build word count plugin for go impl.
 
 
-.PHONY: run-go
+.PHONY: test-go test-rust build-rust
+build-rust: ## build rust mapreducer
+	cd $(RUSTDIR) && cargo build --workspace
+
 test-go: ## run go mapreducer using plugins
 	cd $(GODIR)/main && ./run.sh -r
 
+test-rust: ## run rust mapreducer using plugins
+	cd $(RUSTDIR) && ./run.sh $(DATADIR)/pg-*.txt
 
 clean:
 	$(RM) -r core *~ *.o *.out *.exe

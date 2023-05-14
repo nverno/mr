@@ -6,7 +6,7 @@ use mr_types::KeyValue;
 #[no_mangle]
 pub fn map(filename: String, contents: String) -> Vec<KeyValue> {
     contents
-        .split_whitespace()
+        .split(|c: char| !(c == '\'' || c.is_alphanumeric()))
         .map(|s| KeyValue {
             key: s.to_owned(),
             value: "1".to_owned(),

@@ -1,14 +1,16 @@
-use std::collections::hash_map::DefaultHasher;
 use std::env::temp_dir;
 use std::error::Error;
 use std::fs::{self, File};
-use std::hash::{Hash, Hasher};
 use std::io::{BufReader, Read, Write};
 
 use crate::mapreduce::ReportArgs;
 use crate::mapreduce::{map_reduce_client::MapReduceClient, RequestArgs, TaskType};
 use mr_types::{KeyValue, MapFunc, ReduceFunc};
 use tonic::{transport::Channel, Request};
+
+fn ihash(key: &str) -> usize {
+    key.as_bytes().iter().map(|&b| b as usize).sum()
+}
 
 // Handle map task. Return data to report to coordinator
 fn handle_map(
@@ -23,17 +25,13 @@ fn handle_map(
 
     unsafe {
         let mut kvs = mapf(filename.clone(), contents);
-
         kvs.sort_unstable();
-
         // println!("key-values: {:?}", kvs);
 
-        let mut hasher = DefaultHasher::new();
         let mut buckets: Vec<Vec<KeyValue>> = vec![vec![]; n_reduce];
         for kv in kvs {
-            kv.key.hash(&mut hasher);
-            let k = hasher.finish() % n_reduce as u64;
-            buckets[k as usize].push(kv);
+            let k = ihash(&kv.key) % n_reduce;
+            buckets[k].push(kv);
         }
 
         let mut intermediates = vec![];

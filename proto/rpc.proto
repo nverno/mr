@@ -4,27 +4,27 @@ package mapreduce;
 option go_package = "go/mr";
 
 enum TaskType {
-  None = 0;
-  Map = 1;
+  None   = 0;
+  Map    = 1;
   Reduce = 2;
 }
 
 message RequestArgs {}
 
 message RequestReply {
-  TaskType kind = 1;
-  string filename = 2;
-  int32 task_no = 3;
-  int32 n_reduce = 4;
-  bool done = 5;
+  TaskType kind                 = 1;
+  string filename               = 2;
+  int32 task_no                 = 3;
+  int32 n_reduce                = 4;
+  bool done                     = 5;
   repeated string intermediates = 6;
 }
 
 message ReportArgs {
-  TaskType kind = 1;
-  string task = 2;
-  int32 id = 4;
-  repeated string intermediates = 5;
+  TaskType kind                 = 1;
+  string task                   = 2;
+  int32 id                      = 3;
+  repeated string intermediates = 4;
 }
 
 message ReportReply {}

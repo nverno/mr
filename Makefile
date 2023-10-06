@@ -1,10 +1,10 @@
-SHELL =  /bin/bash
-AWK   ?= gawk
+SHELL     =  /bin/bash
+AWK       ?= gawk
 
-PROTO  =  $(CURDIR)/proto/rpc.proto
-PROTOC ?= protoc
+PROTO     =  $(CURDIR)/proto/rpc.proto
+PROTOC    ?= protoc
 
-DATADIR = $(CURDIR)/data
+DATADIR   = $(CURDIR)/data
 
 GODIR     =  $(CURDIR)/go
 GOSRC     =  $(shell find $(GODIR) -type f -name \*.go)
@@ -12,7 +12,7 @@ GOAPPSDIR =  $(GODIR)/mrapps
 GOAPPS    =  $(shell find $(GOAPPSDIR) -type f -name \*.go)
 GOFLAGS   ?= -race
 
-RUSTDIR = $(CURDIR)/rust
+RUSTDIR   = $(CURDIR)/rust
 
 # export GO111MODULE=on
 

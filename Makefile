@@ -42,7 +42,7 @@ build-rust: ## build rust mapreducer
 	cd $(RUSTDIR) && cargo build --workspace
 
 test-go: ## run go mapreducer using plugins
-	cd $(GODIR)/main && ./run.sh -r
+	cd $(GODIR)/main && ./run.sh --race $(DATADIR)/pg-*.txt
 
 test-rust: ## run rust mapreducer using plugins
 	cd $(RUSTDIR) && ./run.sh $(DATADIR)/pg-*.txt

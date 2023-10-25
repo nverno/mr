@@ -124,9 +124,7 @@ word_count() {
 parse_commandline "$@"
 assign_positional_args 1 "${_positionals[@]}"
 
-if [ ${#_arg_input[@]} -eq 0 ]; then # && die "Missing input files" 1
-    mapfile -t _arg_input < <(find ~/class/mit-6.824-distributed/src/main/ -type f -name 'pg-*.txt')
-fi
+[ ${#_arg_input[@]} -eq 0 ] && die "Missing input files" 1
 echo "Input files: ${_arg_input[*]}"
 
 RACE=-race

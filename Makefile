@@ -1,18 +1,18 @@
-SHELL     =  /bin/bash
-AWK       ?= gawk
+SHELL  = /bin/bash
+AWK   ?= gawk
 
-PROTO     =  $(CURDIR)/proto/rpc.proto
-PROTOC    ?= protoc
+PROTO   = $(CURDIR)/proto/rpc.proto
+PROTOC ?= protoc
 
-DATADIR   = $(CURDIR)/data
+DATADIR  = $(CURDIR)/data
 
-GODIR     =  $(CURDIR)/go
-GOSRC     =  $(shell find $(GODIR) -type f -name \*.go)
-GOAPPSDIR =  $(GODIR)/mrapps
-GOAPPS    =  $(shell find $(GOAPPSDIR) -type f -name \*.go)
+GODIR      = $(CURDIR)/go
+GOSRC      = $(shell find $(GODIR) -type f -name \*.go)
+GOAPPSDIR  = $(GODIR)/mrapps
+GOAPPS     = $(shell find $(GOAPPSDIR) -type f -name \*.go)
 GOFLAGS   ?= -race
 
-RUSTDIR   = $(CURDIR)/rust
+RUSTDIR  = $(CURDIR)/rust
 
 # export GO111MODULE=on
 
@@ -34,7 +34,7 @@ gopb: install $(PROTO) ## Generate go protobuf code
 $(GOAPPSDIR)/%.so: $(GOAPPSDIR)/%.go
 	cd "$(GOAPPSDIR)" && go build $(GOFLAGS) -buildmode=plugin $^
 
-wc.so: $(GOAPPSDIR)/wc.so  ## Build word count plugin for go impl.
+wc.so: $(GOAPPSDIR)/wc.so ## Build word count plugin for go impl.
 
 
 .PHONY: test-go test-rust build-rust
@@ -55,7 +55,7 @@ distclean: clean
 
 
 .PHONY: help
-help:  ## Display this help message
+help: ## Display this help message
 	@for mfile in $(MAKEFILE_LIST); do                  \
 	  grep -E '^[a-zA-Z_%-]+:.*?## .*$$' $$mfile |      \
 	  sort | ${AWK}                                     \
